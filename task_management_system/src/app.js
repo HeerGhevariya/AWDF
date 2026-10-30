@@ -16,16 +16,35 @@ app.use(cors());
 app.use(express.json());
 app.use(requestLogger);
 
-// Serve static files from src/public (chat UI, etc.)
-app.use(express.static(join(__dirname, 'public')));
-
-app.get('/health', (_req, res) => {
-  res.status(200).json({ status: 'ok' });
+// ── API root — JSON info response
+app.get('/', (_req, res) => {
+  res.status(200).json({
+    name: 'Task Management API',
+    version: '1.0.0',
+    status: 'running',
+    docs: {
+      auth: {
+        register: 'POST /api/register',
+        login:    'POST /api/login',
+      },
+      tasks: {
+        getAll:  'GET    /api/tasks',
+        getOne:  'GET    /api/tasks/:id',
+        create:  'POST   /api/tasks',
+        update:  'PUT    /api/tasks/:id',
+        delete:  'DELETE /api/tasks/:id',
+      },
+      ai: {
+        generateDescription: 'POST /api/ai/generate-description',
+        chat:                'POST /api/ai/chat  (SSE stream)',
+      },
+    },
+    health: '/health',
+  });
 });
 
-// Serve the AI chat UI at /chat
-app.get('/chat', (_req, res) => {
-  res.sendFile(join(__dirname, 'public', 'chat.html'));
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok', uptime: process.uptime().toFixed(1) + 's', timestamp: new Date().toISOString() });
 });
 
 // Auth routes (public)
